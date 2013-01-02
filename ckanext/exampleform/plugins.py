@@ -17,7 +17,8 @@ class ExampleFormPlugin(p.SingletonPlugin):
         to be rendered. e.g. 'package/new_package_form.html'.
         """
         # the form has been added to the template directory indicated in the 
-        # update_config() method of this class.
+        # update_config() method of this class. Therefore, only the file name
+        # is used and a sub-directory is not included.
         # **** TO DO ******  Edit this form
         return 'dataset_form.html'
         
