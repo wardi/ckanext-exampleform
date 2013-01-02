@@ -11,6 +11,7 @@ class ExampleFormPlugin(p.SingletonPlugin):
     def update_config(self, config):
         # Need to add a reference to a form directory
         p.toolkit.add_template_directory(config, 'templates/forms')
+        p.toolkit.add_public_directory(config, 'public')
     
     def package_form(self):
         """Returns a string representing the location of the template
