@@ -1,16 +1,15 @@
 
 import ckan.plugins as p
 from ckan.lib.base import c, model
-from ckan.logic.schema import package_form_schema
-from ckan.lib.navl.validators import keep_extras
-from ckan.logic.converters import (free_tags_only, convert_from_tags,
-        convert_to_tags)
+import ckan.logic as logic
+import ckan.logic.schema as ckan_schema
+import ckan.lib.plugins as lib_plugins
+import ckan.logic.converters as converters
 
+class ExampleFormPlugin(p.SingletonPlugin, lib_plugins.DefaultDatasetForm):
 
-class ExampleFormPlugin(p.SingletonPlugin):
-
-    p.implements(p.IConfigurer, inherit=True)
-    p.implements(p.IDatasetForm, inherit=True)
+    p.implements(p.IConfigurer, inherit=False)
+    p.implements(p.IDatasetForm, inherit=False)
 
     def update_config(self, config):
         # Need to add a reference to a form directory
@@ -53,22 +52,24 @@ class ExampleFormPlugin(p.SingletonPlugin):
         
         The default value is 'dataset', as in 'http:.../dataset'.
         """
-        return ["dataset"]
+        
+        #return ["dataset"]
+        return []
 
-    def new_template(self):
-        return 'package/new.html'
-
-    def comments_template(self):
-        return 'package/comments.html'
-
-    def search_template(self):
-        return 'package/search.html'
-
-    def read_template(self):
-        return 'package/read.html'
-
-    def history_template(self):
-        return 'package/history.html'
+#    def new_template(self):
+#        return 'package/new.html'
+#
+#    def comments_template(self):
+#        return 'package/comments.html'
+#
+#    def search_template(self):
+#        return 'package/search.html'
+#
+#    def read_template(self):
+#        return 'package/read.html'
+#
+#    def history_template(self):
+#        return 'package/history.html'
 
     #------------- Optional -----------------
             
@@ -77,12 +78,13 @@ class ExampleFormPlugin(p.SingletonPlugin):
         a format suitable for the database. A schema is a list that describes
         a dataset. See ``ckan.logic.schema``
         """
-        schema = package_form_schema()
-        schema.update({
-            'published_by': [ignore_missing, unicode, convert_to_extras],
-            'genre_tags': [ignore_missing, convert_to_tags(GENRE_VOCAB)],
-            'composer_tags': [ignore_missing, convert_to_tags(COMPOSER_VOCAB)]
-        })
+        schema = ckan_schema.form_to_db_package_schema()
+#        schema = package_form_schema()
+#        schema.update({
+#            'published_by': [unicode],
+#            'genre_tags': [convert_to_tags(GENRE_VOCAB)],
+#            'composer_tags': [convert_to_tags(COMPOSER_VOCAB)]
+#        })
         return schema
         
     def db_to_form_schema(self):
@@ -90,23 +92,26 @@ class ExampleFormPlugin(p.SingletonPlugin):
         into a format suitable for the form (optional)
         """
         # return logic.schema.form_to_db_package_schema()
-        schema = package_form_schema()
-        schema.update({
-            'tags': {
-                '__extras': [keep_extras, free_tags_only]
-            },
-            'genre_tags_selected': [
-                convert_from_tags(GENRE_VOCAB), ignore_missing
-            ],
-            'composer_tags_selected': [
-                convert_from_tags(COMPOSER_VOCAB), ignore_missing
-            ],
-            'published_by': [convert_from_extras, ignore_missing],
-        })
-        schema['groups'].update({
-            'name': [not_empty, unicode],
-            'title': [ignore_missing]
-        })
+        #schema = package_form_schema()
+        
+        schema = ckan_schema.db_to_form_package_schema()
+        
+#        schema.update({
+#            'tags': {
+#                '__extras': [keep_extras, free_tags_only]
+#            },
+#            'genre_tags_selected': [
+#                convert_from_tags(GENRE_VOCAB), ignore_missing
+#            ],
+#            'composer_tags_selected': [
+#                convert_from_tags(COMPOSER_VOCAB), ignore_missing
+#            ],
+#            'published_by': [convert_from_extras, ignore_missing],
+#        })
+#        schema['groups'].update({
+#            'name': [not_empty, unicode],
+#            'title': [ignore_missing]
+#        })
         return schema        
     
     def check_data_dict(self, data_dict, schema=None):
@@ -115,10 +120,10 @@ class ExampleFormPlugin(p.SingletonPlugin):
         """
         return
     
-    def setup_template_variables(self, context, data_dict):
+    def setup_template_variables(self, context, data_dict=None):
         """Add variables to c just prior to the template being rendered.
         """
-        c.my_example_variable = 'blah'
+        lib_plugins.DefaultDatasetForm.setup_template_variables(self, context, data_dict)
     
     # Implement these methods if you wish to over-ride the default values of
     # - package/read.html
